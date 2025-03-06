@@ -8,7 +8,7 @@
 - Optional: Spotify account (for album links)
 
 ### Step 1: Use the Vinyl Collection Template
-1. Open the [Vinyl Collection - TEMPLATE Google Sheet](https://docs.google.com/spreadsheets/d/1xAzo6vCafjT6XekXP-nmN_gapEfnvyCjyyk4ZPo1K3I/edit?usp=sharing)
+1. Open the [Vinyl Collection - TEMPLATE Google Sheet](https://docs.google.com/spreadsheets/d/1IRzoNtRO_GW0C_FxdZlZ-X9aHEeS7KSdf86Rxf4M6Ik/edit?usp=sharing)
 2. Click `File` > `Make a copy`
 3. Save the copy to your Google Drive
 4. Rename your spreadsheet (e.g., "My Vinyl Collection")

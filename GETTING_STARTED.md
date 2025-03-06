@@ -114,6 +114,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+```
 
 #### Option B: Self-Hosting
 

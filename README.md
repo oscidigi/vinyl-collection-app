@@ -21,7 +21,7 @@ This app provides an elegant, filterable grid view of your vinyl record collecti
 ## Quick Start 🚀
 
 ### 1. Get the Template
-- Open the [Vinyl Collection - TEMPLATE Google Sheet](https://docs.google.com/spreadsheets/d/1xAzo6vCafjT6XekXP-nmN_gapEfnvyCjyyk4ZPo1K3I/edit?usp=sharing)
+- Open the [Vinyl Collection - TEMPLATE Google Sheet](https://docs.google.com/spreadsheets/d/1IRzoNtRO_GW0C_FxdZlZ-X9aHEeS7KSdf86Rxf4M6Ik/edit?usp=sharing)
 - Make a copy to your Google Drive
 - Enter your vinyl collection data
 

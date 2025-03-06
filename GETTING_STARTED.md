@@ -75,10 +75,45 @@
 #### Option A: GitHub Pages (Recommended)
 1. Go to your repository's `Settings`
 2. Navigate to the `Pages` section
-3. Under `Source`, select the `main` branch
-4. Save your changes
-5. Wait a few minutes
-6. Your site will be live at `https://[YOUR-GITHUB-USERNAME].github.io/vinyl-collection-app/`
+3. Under `Source`, select `GitHub Actions`
+4. Select 'Static HTML'
+5. Create a new file in your repository at `.github/workflows/deploy.yml` with the following content:
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
 
 #### Option B: Self-Hosting
 

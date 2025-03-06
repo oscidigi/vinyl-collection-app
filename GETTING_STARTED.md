@@ -76,7 +76,7 @@
 1. Go to your repository's `Settings`
 2. Navigate to the `Pages` section
 3. Under `Source`, select `GitHub Actions`
-4. Select 'Static HTML'
+4. Select `Static HTML`
 5. Create a new file in your repository at `.github/workflows/deploy.yml` with the following content:
 
 ```yaml

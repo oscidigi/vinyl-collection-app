@@ -5,6 +5,9 @@ A dynamic web application that displays a vinyl record collection pulled from a 
 
 ![Vinyl Collection Demo Screenshot](screenshot.png)
 
+## Example Collection
+- [Example collection with dummy data](https://oscidigi.github.io/vinyl-collection-app/)
+
 ## Features Showcase
 This app provides an elegant, filterable grid view of your vinyl record collection. Key features include:
 - Responsive album card display

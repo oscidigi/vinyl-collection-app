@@ -166,10 +166,15 @@ function displayAlbums(albums) {
         image.className = 'album-image loading';
         image.alt = `${album.title} by ${album.artist}`;
         image.loading = "lazy"; // Native lazy loading
+        image.width = 300;  // Set explicit dimensions
+        image.height = 300; // to prevent layout shifts
+        image.decoding = "async"; // Use async decoding for better performance
 
         // Handle image loading events
         image.onload = function() {
             image.classList.remove('loading');
+            // Add a loaded class that we can style
+            image.classList.add('loaded');
         };
 
         // Handle image loading errors
@@ -186,8 +191,8 @@ function displayAlbums(albums) {
             // Set initial source to the default background for albums without artwork
             image.src = 'https://iili.io/HlHy9Yx.png';
         } else {
-            // For albums with artwork, use a temporary placeholder until actual artwork loads
-            const tempPlaceholder = `https://placehold.co/400x400/121212/444444?text=${encodeURIComponent('Loading...')}`;
+            // For albums with artwork, use a smaller, optimized placeholder while loading
+            const tempPlaceholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzEyMTIxMiIvPjwvc3ZnPg==';
             image.src = tempPlaceholder;
         }
 

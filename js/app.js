@@ -113,10 +113,22 @@ function displayAlbums(albums) {
                         cardElement.classList.remove('no-artwork');
                     }
                 } else {
+                    // Check if this is a proxy fallback request
+                    if (nextRequest.album._proxyFallback) {
+                        nextRequest.album._onProxyError();
+                    } else {
+                        nextRequest.imageElement.onerror();
+                    }
+                }
+            })
+            .catch(error => {
+                // Check if this is a proxy fallback request
+                if (nextRequest.album._proxyFallback) {
+                    nextRequest.album._onProxyError();
+                } else {
                     nextRequest.imageElement.onerror();
                 }
             })
-            .catch(() => nextRequest.imageElement.onerror())
             .finally(() => {
                 this.running--;
                 setTimeout(() => this.processNext(), 300); // Add delay between requests
@@ -203,11 +215,44 @@ function displayAlbums(albums) {
             } else if (album.artist && album.title) {
                 // Try to get artwork from iTunes API if missing
                 const searchTerm = encodeURIComponent(`${album.artist} ${album.title}`);
-                const proxyUrl = 'https://corsproxy.io/?' + 
-                    encodeURIComponent(`https://itunes.apple.com/search?term=${searchTerm}&media=music&entity=album&limit=1`);
-                
-                // Use request queue for API calls
-                requestQueue.add(proxyUrl, image, album);
+
+                // Use multiple CORS proxies with fallback mechanism
+                const proxyUrls = [
+                    'https://corsproxy.io/?',
+                    'https://api.allorigins.win/raw?url=',
+                    'https://cors-anywhere.herokuapp.com/',
+                ];
+
+                // Start with the first proxy
+                const fetchWithProxyFallback = (proxyIndex = 0) => {
+                    // If we've tried all proxies and none worked, use error handler
+                    if (proxyIndex >= proxyUrls.length) {
+                        console.warn(`All proxies failed for ${album.artist} - ${album.title}`);
+                        image.classList.remove('loading');
+                        image.onerror();
+                        return;
+                    }
+
+                    // Construct URL with current proxy
+                    const itunesApiUrl = `https://itunes.apple.com/search?term=${searchTerm}&media=music&entity=album&limit=1`;
+                    const proxyUrl = proxyUrls[proxyIndex] + encodeURIComponent(itunesApiUrl);
+                    
+                    // Add to request queue with custom error handling for fallback
+                    const originalProcessNext = requestQueue.processNext;
+                    
+                    requestQueue.add(proxyUrl, image, {
+                        ...album,
+                        _proxyFallback: true,
+                        _proxyIndex: proxyIndex,
+                        _onProxyError: () => {
+                            console.log(`Proxy ${proxyIndex + 1}/${proxyUrls.length} failed, trying next...`);
+                            fetchWithProxyFallback(proxyIndex + 1);
+                        }
+                    });
+                };
+
+                // Start the proxy fallback process
+                fetchWithProxyFallback();
             } else {
                 // No artwork and insufficient info for API search
                 image.classList.remove('loading');

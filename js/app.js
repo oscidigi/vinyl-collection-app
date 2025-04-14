@@ -12,6 +12,28 @@ function toggleFilters() {
 
 filterToggle.addEventListener('click', toggleFilters);
 
+// Utility function to detect network changes and optimize loading
+function setupNetworkObserver() {
+    if (!navigator.connection) return; // Not supported
+    
+    const connection = navigator.connection;
+    
+    // Log initial connection type
+    console.log(`Initial connection type: ${connection.effectiveType}`);
+    
+    // Listen for connection changes
+    connection.addEventListener('change', () => {
+        console.log(`Connection changed to ${connection.effectiveType}`);
+        // The request queue will automatically use the new values via the getter
+    });
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    setupNetworkObserver();
+    fetchVinylData();
+});
+
 // Function to safely open Spotify URL in a new tab
 function openSpotifyUrl(url) {
     if (url && typeof url === 'string' && url.trim() !== '') {
@@ -86,17 +108,54 @@ function displayAlbums(albums) {
         return;
     }
 
-    // Queue for managing API requests
+    // Queue for managing API requests with device-aware limits
     const requestQueue = {
         queue: [],
         running: 0,
-        maxConcurrent: 3, // Limit concurrent requests
         
+        // Determine optimal concurrent requests based on device and network
+        get maxConcurrent() {
+            // Check if running on a mobile device
+            const isMobile = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+            
+            // Check for connection info if available (modern browsers)
+            if (navigator.connection) {
+                const conn = navigator.connection;
+                
+                // Slow connection detection
+                if (conn.saveData || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') {
+                    console.log('Detected slow connection, limiting concurrent requests to 1');
+                    return 1; // Minimize requests on very slow connections
+                }
+                
+                // Medium speed connection (3G)
+                if (conn.effectiveType === '3g') {
+                    console.log('Detected 3G connection, limiting concurrent requests to 2');
+                    return isMobile ? 1 : 2; // More conservative on mobile
+                }
+                
+                // Fast connection but on mobile
+                if (isMobile) {
+                    console.log('Detected mobile device, limiting concurrent requests to 2');
+                    return 2; // Conservative default for mobile
+                }
+            } else if (isMobile) {
+                // Fallback for browsers without Connection API but on mobile
+                console.log('Mobile device detected, limiting concurrent requests');
+                return 2;
+            }
+            
+            // Desktop with good connection (default)
+            return 4; // Slightly increased from original 3 for modern connections
+        },
+        
+        // Rest of the request queue implementation...
         add: function(url, imageElement, album) {
             this.queue.push({url, imageElement, album});
             this.processNext();
         },
         
+        // The processNext method should remain as implemented in previous step
         processNext: function() {
             if (this.running >= this.maxConcurrent || this.queue.length === 0) return;
             
@@ -356,4 +415,7 @@ function displayAlbums(albums) {
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
 // Load data when the page loads
-document.addEventListener('DOMContentLoaded', fetchVinylData);
+document.addEventListener('DOMContentLoaded', () => {
+    setupNetworkObserver();
+    fetchVinylData();
+});

@@ -1467,5 +1467,6 @@ window.VinylStatsUI = {
 // Export to global scope
 window.VinylStatsUI = {
     showStatsModal,
-    hideStatsModal
+    hideStatsModal,
+    initStatsUI  // This line should have been added
 };

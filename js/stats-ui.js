@@ -316,20 +316,42 @@ function showStatsModal() {
         statsContent.style.display = 'none';
     }
     
+    // Log data availability to help with debugging
+    console.log('Looking for album data sources...');
+    if (window.vinylData && window.vinylData.albums) {
+        console.log('Found vinylData.albums with', window.vinylData.albums.length, 'albums');
+    } else {
+        console.log('No vinylData.albums found');
+    }
+    
+    if (window.albumsData) {
+        console.log('Found albumsData with', window.albumsData.length, 'albums');
+    } else {
+        console.log('No albumsData found');
+    }
+    
+    // Count albums in DOM
+    const albumCards = document.querySelectorAll('.album-card');
+    console.log('Found', albumCards.length, 'album cards in DOM');
+    
     // Get current albums from the global state
-    // This assumes the albums are stored in a global vinylData or similar variable
+    // Try multiple potential data sources
     let albums = [];
     
     // Try to find the albums array in the global scope
-    if (window.vinylData && window.vinylData.albums) {
+    if (window.vinylData && Array.isArray(window.vinylData.albums) && window.vinylData.albums.length > 0) {
         albums = window.vinylData.albums;
-    } else if (window.albumsData) {
+        console.log('Using vinylData.albums as data source');
+    } else if (window.albumsData && Array.isArray(window.albumsData) && window.albumsData.length > 0) {
         albums = window.albumsData;
+        console.log('Using albumsData as data source');
+    } else if (window.albums && Array.isArray(window.albums) && window.albums.length > 0) {
+        albums = window.albums;
+        console.log('Using global albums array as data source');
     } else {
-        // Try to get all album cards and extract data
-        const albumCards = document.querySelectorAll('.album-card');
+        // Try to get all album cards and extract data as a fallback
         if (albumCards.length > 0) {
-            console.log('Extracting data from DOM elements');
+            console.log('Extracting data from DOM elements as fallback');
             // This is a fallback that extracts limited data from the DOM
             albums = Array.from(albumCards).map(card => {
                 const artist = card.querySelector('.album-artist')?.textContent || '';
@@ -337,21 +359,27 @@ function showStatsModal() {
                 const genre = card.querySelector('.album-genre')?.textContent || '';
                 const year = card.querySelector('.album-year')?.textContent || '';
                 const isFavorite = card.classList.contains('favorite');
+                const isEP = card.querySelector('.album-ep-tag') !== null;
                 
                 return {
                     artist,
                     title,
                     genre,
                     year,
-                    isfavorite: isFavorite ? 'yes' : 'no'
+                    isfavorite: isFavorite ? 'yes' : 'no',
+                    isep: isEP ? 'yes' : 'no'
                 };
             });
+            console.log('Extracted', albums.length, 'albums from DOM');
+        } else {
+            console.warn('No album data sources found');
         }
     }
     
     // Generate stats after a short delay to allow the modal animation to complete
     setTimeout(() => {
         if (albums && albums.length > 0) {
+            console.log('Generating stats content with', albums.length, 'albums');
             generateStatsContent(albums);
         } else {
             // Show error in stats content
@@ -362,6 +390,7 @@ function showStatsModal() {
                     <div class="stats-error">
                         <h3>Unable to Load Collection Data</h3>
                         <p>We couldn't find your vinyl collection data to analyze. Please make sure your collection has been loaded.</p>
+                        <p class="stats-error-detail">Try refreshing the page and waiting for your collection to fully load before viewing statistics.</p>
                     </div>
                 `;
             }

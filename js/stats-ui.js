@@ -883,7 +883,7 @@ function createDonutChart(container, data, labelKey, valueKey, percentageKey) {
         const percentageValue = percentageKey ? item[percentageKey] : ((value / total) * 100).toFixed(1);
         path.setAttribute('data-label', item[labelKey]);
         path.setAttribute('data-value', value);
-        path.setAttribute('data-percentage', percentage);
+        path.setAttribute('data-percentage', percentageValue);
         
         // Add tooltip behavior
         path.addEventListener('mouseenter', showTooltip);

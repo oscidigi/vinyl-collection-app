@@ -456,24 +456,20 @@ function addEnhancedListeningTimeStyles() {
     const styles = document.createElement('style');
     styles.id = 'enhanced-listening-time-styles';
     styles.textContent = `
-        .listening-time-fun-facts {
+        .stats-fun-facts-title {
             margin-top: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        
-        .listening-time-fun-facts h4 {
-            margin-top: 0;
             margin-bottom: 12px;
             color: #6200ee;
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .stats-fun-list {
             list-style: none;
             padding: 0;
             margin: 0;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
         }
         
         .stats-fun-list li {
@@ -494,8 +490,13 @@ function addEnhancedListeningTimeStyles() {
             margin-top: 2px;
         }
         
+        .stats-fun-list li span {
+            flex: 1;
+        }
+        
         .stats-fun-list strong {
             color: #6200ee;
+            padding: 0 2px;
         }
         
         @media (max-width: 768px) {
@@ -854,6 +855,9 @@ function generateListeningTimeInfo(listeningTime) {
     const roadTripDistance = Math.round(listeningTime.hours * 65); // avg 65 mph
     const novelCount = Math.floor(listeningTime.hours / 5); // avg 5 hours per novel
     
+    // Format the road trip percentage more reliably
+    const roadTripPercentage = Math.floor(2800/roadTripDistance*100);
+    
     // Create content with enhanced information
     container.innerHTML = `
         <div class="stats-listening-time">
@@ -870,42 +874,40 @@ function generateListeningTimeInfo(listeningTime) {
             </div>
         </div>
         
-        <div class="listening-time-fun-facts">
-            <h4>Fun Facts About Your Collection</h4>
-            <ul class="stats-fun-list">
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    Listening to your collection 8 hours a day would take <strong>${marathonDays} days</strong> to complete.
-                </li>
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                        <line x1="6" y1="1" x2="6" y2="4"></line>
-                        <line x1="10" y1="1" x2="10" y2="4"></line>
-                        <line x1="14" y1="1" x2="14" y2="4"></line>
-                    </svg>
-                    You could listen to <strong>${albumsPerDay} albums per day</strong> for a full day and not repeat any music.
-                </li>
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    A coast-to-coast road trip from New York to Los Angeles (~2,800 miles) would let you listen to about <strong>${Math.floor(2800/roadTripDistance*100)}%</strong> of your collection.
-                </li>
-                <li>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                    In the time it takes to listen to your entire collection, you could read <strong>${novelCount} novels</strong> (at 5 hours per book).
-                </li>
-            </ul>
-        </div>
+        <h3 class="stats-fun-facts-title">Fun Facts About Your Collection</h3>
+        <ul class="stats-fun-list">
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Listening to your collection 8 hours a day would take <strong>${marathonDays}</strong> days to complete.</span>
+            </li>
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+                <span>You could listen to <strong>${albumsPerDay}</strong> albums per day for a full day and not repeat any music.</span>
+            </li>
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>A coast-to-coast road trip from NY to LA (~2,800 miles) would let you listen to about <strong>${roadTripPercentage}%</strong> of your collection.</span>
+            </li>
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <span>In the time it takes to listen to your entire collection, you could read <strong>${novelCount}</strong> novels (at 5 hours per book).</span>
+            </li>
+        </ul>
     `;
 }
 

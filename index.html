@@ -79,5 +79,18 @@
     <script src="js/stats.js"></script>
     <script src="js/stats-ui.js"></script>
     <script src="js/stats-integration.js"></script>
+
+    <script>
+      // Direct call to initialize the stats UI
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initStatsUI === 'function') {
+          initStatsUI();
+        } else if (window.VinylStatsUI && typeof window.VinylStatsUI.initStatsUI === 'function') {
+          window.VinylStatsUI.initStatsUI();
+        } else {
+          console.error('Stats UI initialization function not found!');
+        }
+      });
+    </script>
 </body>
 </html>

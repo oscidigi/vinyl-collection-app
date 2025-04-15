@@ -17,20 +17,42 @@ window.vinylData = {
  * This hooks into the existing app to capture data and add the stats feature
  */
 function initCollectionStats() {
+    console.log('Initializing Collection Stats feature...');
+    
     // Load the required CSS
     loadStatsStyles();
     
     // Hook into the data loading process
     hookIntoDataLoading();
     
-    // Initialize the stats UI (button and modal)
-    if (window.VinylStatsUI && typeof window.VinylStatsUI.showStatsModal === 'function') {
-        window.initStatsUI();
-    } else {
-        // If the UI module isn't loaded yet, wait and try again
-        document.addEventListener('statsModulesLoaded', () => {
+    // Initialize the stats UI (button and modal) if not already done
+    // We'll use a flag to track if initialization has happened
+    if (!window.statsInitialized) {
+        if (window.VinylStatsUI && typeof window.VinylStatsUI.initStatsUI === 'function') {
+            window.VinylStatsUI.initStatsUI();
+            window.statsInitialized = true;
+            console.log('Stats UI initialized from integration module');
+        } else if (typeof window.initStatsUI === 'function') {
             window.initStatsUI();
-        });
+            window.statsInitialized = true;
+            console.log('Stats UI initialized from global function');
+        } else {
+            // If the UI module isn't loaded yet, wait and try again
+            console.log('Stats UI not ready, will try again in 500ms');
+            setTimeout(function() {
+                if (window.VinylStatsUI && typeof window.VinylStatsUI.initStatsUI === 'function') {
+                    window.VinylStatsUI.initStatsUI();
+                    window.statsInitialized = true;
+                    console.log('Stats UI initialized after delay');
+                } else if (typeof window.initStatsUI === 'function') {
+                    window.initStatsUI();
+                    window.statsInitialized = true;
+                    console.log('Stats UI initialized after delay via global function');
+                } else {
+                    console.error('Failed to initialize Stats UI after delay');
+                }
+            }, 500);
+        }
     }
     
     console.log('Collection Stats feature initialized');
@@ -40,13 +62,20 @@ function initCollectionStats() {
  * Load the stats CSS styles
  */
 function loadStatsStyles() {
-    const head = document.head || document.getElementsByTagName('head')[0];
-    const style = document.createElement('link');
-    style.rel = 'stylesheet';
-    style.type = 'text/css';
-    style.href = 'css/stats.css';
-    head.appendChild(style);
+    // Check if the styles are already loaded
+    if (!document.querySelector('link[href="css/stats.css"]')) {
+        const head = document.head || document.getElementsByTagName('head')[0];
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.type = 'text/css';
+        style.href = 'css/stats.css';
+        head.appendChild(style);
+        console.log('Stats CSS loaded');
+    }
 }
+
+// The rest of the file remains unchanged
+// Original hookIntoDataLoading function and other utility functions...
 
 /**
  * Hook into the app's data loading function to capture album data
@@ -186,15 +215,17 @@ async function loadModules() {
 
 // Initialize when the DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Initializing Collection Stats feature...');
+    console.log('Stats integration: DOMContentLoaded fired');
     
-    // Load required modules
+    // Load required modules if needed
     if (!areAllModulesLoaded()) {
         await loadModules();
     }
     
-    // Initialize the feature
-    initCollectionStats();
+    // Initialize the feature with a slight delay to allow other scripts to load
+    setTimeout(() => {
+        initCollectionStats();
+    }, 300);
 });
 
 // Export some utilities for debugging
@@ -206,5 +237,15 @@ window.CollectionStats = {
         } else {
             console.error('Stats UI module not loaded yet');
         }
+    },
+    initNow: () => {
+        if (typeof window.initStatsUI === 'function') {
+            window.initStatsUI();
+            return true;
+        } else if (window.VinylStatsUI && typeof window.VinylStatsUI.initStatsUI === 'function') {
+            window.VinylStatsUI.initStatsUI();
+            return true;
+        }
+        return false;
     }
 };

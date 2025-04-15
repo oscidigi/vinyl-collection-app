@@ -6,6 +6,8 @@
  * Creates the button and prepares the modal structure
  */
 function initStatsUI() {
+    console.log('Initializing Stats UI...');
+    
     // Create the stats button in the header
     createStatsButton();
     
@@ -14,6 +16,8 @@ function initStatsUI() {
     
     // Add event listeners for modal interaction
     setupEventListeners();
+    
+    console.log('Stats UI initialization complete');
 }
 
 /**
@@ -1454,19 +1458,23 @@ function exportStatsAsImage() {
     alert('Image export functionality would be implemented here with html2canvas or a similar library.');
 }
 
-// Initialize the stats UI when the script loads
-document.addEventListener('DOMContentLoaded', initStatsUI);
+// Initialize the stats UI when the script loads - moved from bottom of file
+document.addEventListener('DOMContentLoaded', function() {
+    // Use setTimeout to ensure this runs after other initialization
+    setTimeout(function() {
+        console.log('Auto-initializing Stats UI on DOMContentLoaded');
+        if (typeof initStatsUI === 'function') {
+            initStatsUI();
+        }
+    }, 200);
+});
 
-// Export to global scope - ADD initStatsUI HERE
+// Export to global scope - ONLY ONCE
 window.VinylStatsUI = {
     showStatsModal,
     hideStatsModal,
-    initStatsUI  // Add this line to expose the function
+    initStatsUI
 };
 
-// Export to global scope
-window.VinylStatsUI = {
-    showStatsModal,
-    hideStatsModal,
-    initStatsUI  // This line should have been added
-};
+// Make the function available globally for direct calls
+window.initStatsUI = initStatsUI;

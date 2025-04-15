@@ -81,6 +81,15 @@ function loadStatsStyles() {
  * Hook into the app's data loading function to capture album data
  */
 function hookIntoDataLoading() {
+    console.log('Setting up data capture hooks');
+    
+    // Check for existing data first
+    if (window.albumsData && Array.isArray(window.albumsData) && window.albumsData.length > 0) {
+        console.log('Found existing albumsData with', window.albumsData.length, 'albums');
+        window.vinylData.albums = window.albumsData;
+        window.vinylData.isLoaded = true;
+    }
+    
     // Check if fetchVinylData exists in the global scope
     if (typeof window.fetchVinylData === 'function') {
         // Store the original function
@@ -88,6 +97,7 @@ function hookIntoDataLoading() {
         
         // Replace with our enhanced version
         window.fetchVinylData = function() {
+            console.log('Intercepted fetchVinylData call');
             const result = originalFetchVinylData.apply(this, arguments);
             
             // If the result is a Promise, hook into it
@@ -95,9 +105,12 @@ function hookIntoDataLoading() {
                 result.then(data => {
                     // Store the albums data for stats use
                     if (data && Array.isArray(data)) {
+                        console.log('Data loaded by fetchVinylData:', data.length, 'albums');
                         window.vinylData.albums = data;
                         window.vinylData.isLoaded = true;
-                        console.log('Vinyl data captured for stats:', data.length, 'albums');
+                        
+                        // Also store in global albumsData for compatibility
+                        window.albumsData = data;
                     }
                 }).catch(error => {
                     console.error('Error capturing vinyl data for stats:', error);
@@ -109,11 +122,77 @@ function hookIntoDataLoading() {
         
         console.log('Successfully hooked into data loading function');
     } else {
-        // If the function doesn't exist yet, check for albumsData directly
+        console.log('fetchVinylData not found, setting up alternative data capture');
+        
+        // Watch for changes to the albums grid as an alternative data source
+        const albumsGrid = document.getElementById('albums-grid');
+        if (albumsGrid) {
+            console.log('Setting up albums grid observer');
+            
+            // Set up a mutation observer to detect when albums are added
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        // Albums were added to the grid, extract data
+                        const albumCards = albumsGrid.querySelectorAll('.album-card');
+                        
+                        if (albumCards.length > 0) {
+                            console.log('Albums added to grid, extracting data from', albumCards.length, 'cards');
+                            
+                            // Extract data from cards
+                            const extractedData = Array.from(albumCards).map(card => {
+                                const artist = card.querySelector('.album-artist')?.textContent || '';
+                                const title = card.querySelector('.album-title')?.textContent || '';
+                                const genre = card.querySelector('.album-genre')?.textContent || '';
+                                const year = card.querySelector('.album-year')?.textContent || '';
+                                const isFavorite = card.classList.contains('favorite');
+                                const isEP = card.querySelector('.album-ep-tag') !== null;
+                                
+                                return {
+                                    artist,
+                                    title,
+                                    genre,
+                                    year,
+                                    isfavorite: isFavorite ? 'yes' : 'no',
+                                    isep: isEP ? 'yes' : 'no'
+                                };
+                            });
+                            
+                            if (extractedData.length > 0) {
+                                window.vinylData.albums = extractedData;
+                                window.vinylData.isLoaded = true;
+                                window.albumsData = extractedData;
+                                console.log('Extracted', extractedData.length, 'albums from DOM');
+                            }
+                        }
+                    }
+                }
+            });
+            
+            observer.observe(albumsGrid, { childList: true, subtree: true });
+        }
+        
+        // Also check periodically for album data
         const checkForAlbumsData = setInterval(() => {
-            // Look for albums data in the DOM
+            if (window.vinylData.isLoaded) {
+                clearInterval(checkForAlbumsData);
+                return;
+            }
+            
+            // Check for albumsData global
+            if (window.albumsData && Array.isArray(window.albumsData) && window.albumsData.length > 0) {
+                window.vinylData.albums = window.albumsData;
+                window.vinylData.isLoaded = true;
+                console.log('Found albumsData in global scope:', window.albumsData.length, 'albums');
+                clearInterval(checkForAlbumsData);
+                return;
+            }
+            
+            // Look for albums in the DOM as a fallback
             const albumCards = document.querySelectorAll('.album-card');
             if (albumCards.length > 0) {
+                console.log('Found', albumCards.length, 'album cards in DOM');
+                
                 // Extract data from the DOM
                 const extractedData = Array.from(albumCards).map(card => {
                     const artist = card.querySelector('.album-artist')?.textContent || '';
@@ -136,16 +215,10 @@ function hookIntoDataLoading() {
                 if (extractedData.length > 0) {
                     window.vinylData.albums = extractedData;
                     window.vinylData.isLoaded = true;
-                    console.log('Vinyl data extracted from DOM:', extractedData.length, 'albums');
+                    window.albumsData = extractedData;
+                    console.log('Extracted', extractedData.length, 'albums from DOM');
                     clearInterval(checkForAlbumsData);
                 }
-            }
-            // Also check for global variables that might contain the data
-            else if (window.albumsData && Array.isArray(window.albumsData) && window.albumsData.length > 0) {
-                window.vinylData.albums = window.albumsData;
-                window.vinylData.isLoaded = true;
-                console.log('Vinyl data found in global albumsData:', window.albumsData.length, 'albums');
-                clearInterval(checkForAlbumsData);
             }
         }, 1000);
         

@@ -1457,6 +1457,13 @@ function exportStatsAsImage() {
 // Initialize the stats UI when the script loads
 document.addEventListener('DOMContentLoaded', initStatsUI);
 
+// Export to global scope - ADD initStatsUI HERE
+window.VinylStatsUI = {
+    showStatsModal,
+    hideStatsModal,
+    initStatsUI  // Add this line to expose the function
+};
+
 // Export to global scope
 window.VinylStatsUI = {
     showStatsModal,

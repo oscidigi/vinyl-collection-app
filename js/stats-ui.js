@@ -24,46 +24,64 @@ function initStatsUI() {
  * Create the stats button and add it to the page header
  */
 function createStatsButton() {
-    const header = document.querySelector('header') || document.querySelector('.header');
+    // First try to use the placeholder we added to the HTML
+    let buttonContainer = document.getElementById('stats-button-placeholder');
     
-    if (!header) {
-        console.error('Could not find header element for stats button');
-        return;
+    if (buttonContainer) {
+        console.log('Found stats button placeholder, using it');
+    } else {
+        console.log('No stats button placeholder found, creating one');
+        // Find the header element
+        const header = document.querySelector('header .container') || document.querySelector('header');
+        
+        if (!header) {
+            console.error('Could not find header element for stats button');
+            return;
+        }
+        
+        // Create button container
+        buttonContainer = document.createElement('div');
+        buttonContainer.className = 'stats-button-container';
+        buttonContainer.id = 'stats-button-placeholder';
+        
+        // Check if there's a header-content div
+        let headerContent = header.querySelector('.header-content');
+        
+        if (headerContent) {
+            // If header content exists, append the button container to it
+            headerContent.appendChild(buttonContainer);
+            console.log('Appended button container to existing header-content');
+        } else {
+            // If no header content exists, just append directly to header
+            header.appendChild(buttonContainer);
+            console.log('Appended button container directly to header');
+        }
     }
     
-    // Create button container (for positioning)
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'stats-button-container';
-    
-    // Create the button element
-    const statsButton = document.createElement('button');
-    statsButton.id = 'collection-stats-button';
-    statsButton.className = 'stats-button';
-    statsButton.setAttribute('aria-label', 'View Collection Statistics');
-    
-    // Add button text and icon
-    statsButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stats-icon">
-            <path d="M3 3v18h18"></path>
-            <path d="M18 17V9"></path>
-            <path d="M13 17V5"></path>
-            <path d="M8 17v-3"></path>
-        </svg>
-        <span>Collection Stats</span>
-    `;
-    
-    // Add to page
-    buttonContainer.appendChild(statsButton);
-    
-    // Find the right place to insert the button
-    const filterToggle = document.getElementById('filter-toggle');
-    
-    if (filterToggle) {
-        // Insert before the filter toggle for consistent placement
-        header.insertBefore(buttonContainer, filterToggle);
+    // Create the button element if it doesn't already exist
+    if (!document.getElementById('collection-stats-button')) {
+        console.log('Creating stats button');
+        const statsButton = document.createElement('button');
+        statsButton.id = 'collection-stats-button';
+        statsButton.className = 'stats-button';
+        statsButton.setAttribute('aria-label', 'View Collection Statistics');
+        
+        // Add button text and icon
+        statsButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="stats-icon">
+                <path d="M3 3v18h18"></path>
+                <path d="M18 17V9"></path>
+                <path d="M13 17V5"></path>
+                <path d="M8 17v-3"></path>
+            </svg>
+            <span>Collection Stats</span>
+        `;
+        
+        // Add to page
+        buttonContainer.appendChild(statsButton);
+        console.log('Stats button added to container');
     } else {
-        // Fallback - append to header
-        header.appendChild(buttonContainer);
+        console.log('Stats button already exists');
     }
 }
 

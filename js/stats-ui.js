@@ -1,11 +1,20 @@
 // stats-ui.js - UI component for displaying vinyl collection statistics
 // This module creates and manages the statistics modal interface
 
+// Add this flag to track initialization status
+let statsUIInitialized = false;
+
 /**
  * Initialize the stats UI components
  * Creates the button and prepares the modal structure
  */
 function initStatsUI() {
+    // Prevent multiple initializations
+    if (statsUIInitialized) {
+        console.log('Stats UI already initialized, skipping');
+        return;
+    }
+    
     console.log('Initializing Stats UI...');
     
     // Create the stats button in the header
@@ -16,6 +25,9 @@ function initStatsUI() {
     
     // Add event listeners for modal interaction
     setupEventListeners();
+    
+    // Mark as initialized
+    statsUIInitialized = true;
     
     console.log('Stats UI initialization complete');
 }
@@ -1505,13 +1517,15 @@ function exportStatsAsImage() {
     alert('Image export functionality would be implemented here with html2canvas or a similar library.');
 }
 
-// Initialize the stats UI when the script loads - moved from bottom of file
+// Initialize the stats UI when the script loads
 document.addEventListener('DOMContentLoaded', function() {
     // Use setTimeout to ensure this runs after other initialization
     setTimeout(function() {
-        console.log('Auto-initializing Stats UI on DOMContentLoaded');
-        if (typeof initStatsUI === 'function') {
-            initStatsUI();
+        if (!statsUIInitialized) {
+            console.log('Auto-initializing Stats UI on DOMContentLoaded');
+            if (typeof initStatsUI === 'function') {
+                initStatsUI();
+            }
         }
     }, 200);
 });
